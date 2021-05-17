@@ -7,6 +7,8 @@ export class CheckController {
 
   @Post()
   async event(@Body() payload: { lang: string; content: string }, @Res() res) {
-    return this.checkService.check(payload.lang, payload.content);
+    return res
+      .status(200)
+      .send(await this.checkService.check(payload.lang, payload.content));
   }
 }

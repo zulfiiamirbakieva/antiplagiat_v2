@@ -1,62 +1,121 @@
-const Diff = require('diff');
-
 const regex = new RegExp(
   '/asm|var|let|map|function|reduce|each|else|new|this|auto|enum|operator|throw|explicit|private|true|break|export|protected|try|case|extern|public|typedef|catch|false|register|typeid|reinterpret_cast|typename|class|return|union|const|friend|unsigned|const_cast|goto|signed|using|continue|if|sizeof|virtual|default|inline|static|void|delete|static_cast|volatile|struct|wchar_t|mutable|switch|dynamic_cast|namespace|template|for|do|while|bool|char|float|short|int|long|double|([\\\\+]|[-]|[\\\\*]|[=]|[%]|[>]|[<]|[!]|[~]|[&]|[|])|(\\\\^=|[\\\\|]=|%=|&=|\\\\*=|\\\\-=|\\\\+=|>>|<<|([|][|])|&&|<=| >=|!=|[=]{2}|]|[\\\\-]{2}|[\\\\+]{2})|(>>=|<<=)|-?[0-9]+[.]?[0-9]*|\\\\w+/g',
 );
 
 export class Checker {
   public initialCode: string;
-  public searchResults: string[];
+  public searchResults: { content: string[]; url: string }[];
 
   public normalizedInitialCode: string;
-  public normalizedSearchResults: string[];
+  public normalizedSearchResults: { content: string[]; url: string }[];
 
   constructor(
     initialCode: string,
-    searchResults: string[],
-    normalize?: boolean,
+    searchResults: { content: string[]; url: string }[],
   ) {
     this.initialCode = initialCode;
     this.searchResults = searchResults;
-    if (normalize) {
-      this.normalizedInitialCode = this._normalize(this.initialCode);
-      this.normalizedSearchResults = this.searchResults.map((str: string) =>
-        this._normalize(str),
-      );
-    } else {
-      this.normalizedInitialCode = this.initialCode;
-      this.normalizedSearchResults = this.filterArray(this.searchResults);
-    }
+    this.normalizedInitialCode = this.initialCode;
+    this.normalizedSearchResults = this.searchResults;
   }
 
   public levenshtein() {
-    const diffs = this.normalizedSearchResults
-      .map((str: string) => {
-        if (str) {
-          const diff = this._levenshtein(this.normalizedInitialCode, str);
-          return (
-            (1 -
-              diff /
-                this.getMaxBetweenTwo(
-                  this.normalizedInitialCode.length,
-                  str.length,
-                )) *
-            100
-          );
-        }
-        return null;
-      })
-      .filter((str) => !!str);
-    console.log('levenshtein diff ', this.getAvgOfArray(diffs));
+    return this.calculateLevenshtein();
   }
 
-  public splitDiif() {
-    const diffs = this.normalizedSearchResults.map((str: string) => {
-      console.log('this.normalizedInitialCode', this.normalizedInitialCode);
-      console.log('str', str);
-      const diff = Diff.diffTrimmedLines(this.normalizedInitialCode, str);
-      console.log('diff', diff);
+  private calculateLevenshtein() {
+    return this.normalizedSearchResults
+      .map(({ content, url }) => {
+        return {
+          lv_values: content
+            .map((str) => {
+              const diff = this._levenshtein(this.normalizedInitialCode, str);
+              const diffValue = this.calculateValue(diff, str);
+              const shingling = this.shingling(this.normalizedInitialCode, str);
+              if (diffValue > 20) {
+                return {
+                  content: str,
+                  value: diffValue,
+                  shinglingValue: shingling || 0,
+                };
+              } else {
+                return {
+                  content: str,
+                  value: 0,
+                  shinglingValue: 0,
+                };
+              }
+            })
+            .filter((a) => !!a.value),
+          url: url,
+        };
+      })
+      .sort((a, b) => {
+        const sumOfAValues = a.lv_values.reduce((x, z) => (x += z.value), 0);
+        const sumOfBValues = b.lv_values.reduce((x, z) => (x += z.value), 0);
+        if (sumOfAValues > sumOfBValues) {
+          return -1;
+        } else if (sumOfAValues < sumOfBValues) {
+          return 1;
+        }
+        return 0;
+      });
+  }
+
+  shingling(initial, searched) {
+    initial = this.hash(initial);
+    searched = this.hash(searched);
+    return this.compareShingles(initial, searched);
+  }
+
+  private hash(text) {
+    text = text.toLowerCase();
+    text = this._normalize(text);
+    const shingles = this.shingle(text.split(' '), 3);
+    return shingles.map((arr) => {
+      return arr.map((str) => {
+        return this.hashString(str);
+      });
     });
+  }
+  private shingle(collection, size) {
+    const shingles = [];
+    for (let i = 0; i < collection.length - size + 1; i++) {
+      shingles.push(collection.slice(i, i + size));
+    }
+    return shingles;
+  }
+  private hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash += Math.pow(str.charCodeAt(i) * 31, str.length - i);
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+  }
+  private union(array_first, array_second) {
+    const concat_array = [...array_first, ...array_second];
+    return [...new Set(concat_array)];
+  }
+  private intersect(a, b) {
+    return [...new Set(a)].filter((x) => new Set(b).has(x));
+  }
+  private compareShingles(arr1, arr2) {
+    let unionArr = arr1.map((val, key) => {
+      if (arr2[key]) {
+        return this.union(val, arr2[key]);
+      }
+    });
+    unionArr = unionArr.filter((i) => i);
+    let intersectArr = arr1.map((val, key) => {
+      if (arr2[key]) {
+        return this.intersect(val, arr2[key]);
+      }
+    });
+    intersectArr = intersectArr.filter((i) => i);
+    return parseFloat(
+      ((intersectArr.flat().length / unionArr.flat().length) * 100).toString(),
+    ).toFixed(2);
   }
 
   private filterArray(arr: string[]): string[] {
@@ -78,6 +137,18 @@ export class Checker {
     arr = arr.filter((a) => !!a);
     const sum = arr.reduce((a, b) => a + b, 0);
     return sum / arr.length;
+  }
+
+  private calculateValue(diff, str): number {
+    return (
+      (1 -
+        diff /
+          this.getMaxBetweenTwo(
+            this.normalizedInitialCode.length,
+            str.length,
+          )) *
+      100
+    );
   }
 
   private _levenshtein(s1: string, s2: string, costs?: any) {

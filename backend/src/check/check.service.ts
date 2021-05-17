@@ -20,20 +20,57 @@ export class CheckService {
         }, []),
       ),
     ];
-    console.log(pageLinks);
     const pageContentsPromise = pageLinks.map(async (link: string) => {
       const html = await this.getPageContent(link);
-      return this.parseHtml(html);
+      const pageCode = this.parseHtml(html, content);
+
+      return {
+        content: pageCode,
+        url: link,
+      };
     });
     const pageContentsArray = await Promise.all(pageContentsPromise);
-    const checker = new Checker(content, this.flattern(pageContentsArray));
-    //checker.normalize();
-    // checker.levenshtein();
-    checker.splitDiif();
+    const pageContentsArrayFiltered = pageContentsArray.filter(
+      (item) => !!item,
+    );
+    const checker = new Checker(content, pageContentsArrayFiltered);
+    const levenshtein = checker.levenshtein();
+    return {
+      expand: levenshtein,
+    };
   }
 
   async getPages(lang: string, content: string) {
-    const promise_data = content.split('\n').map(async (line: string) => {
+    return this.fullTextSearch(content);
+  }
+
+  async fullTextSearch(
+    content: string,
+  ): Promise<{ totalPages: number; pages: string[] }[]> {
+    const response = await this.googleService.search(
+      encodeURIComponent(content),
+    );
+    if (response && response.data && response.data.items.length) {
+      const pages = response.data.items.map((item) => {
+        return item.link;
+      });
+      return [
+        {
+          totalPages: +response.data.searchInformation.totalResults,
+          pages: pages,
+        },
+      ];
+    }
+    return [
+      {
+        totalPages: 0,
+        pages: [],
+      },
+    ];
+  }
+
+  lineSearch(content: string): Promise<any>[] {
+    return content.split('\n').map(async (line: string) => {
       const pages: string[] = [];
       const response = await this.googleService.search(
         encodeURIComponent(line),
@@ -55,7 +92,6 @@ export class CheckService {
         pages: [],
       };
     });
-    return Promise.all(promise_data);
   }
 
   async getPageContent(url: string) {
@@ -63,7 +99,7 @@ export class CheckService {
     return response.data;
   }
 
-  private parseHtml(html: string): string[] {
+  private parseHtml(html: string, content: string): string[] {
     const $ = cheerio.load(html, null, true);
     const code = [];
     $('code').each((i: number, $el) => {
