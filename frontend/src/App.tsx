@@ -9,6 +9,7 @@ import {
 import Main from "./kit/scenes/Main";
 import {Nav, Navbar, NavDropdown} from "react-bootstrap";
 import Editor from "./kit/scenes/Editor";
+import Login from "./kit/scenes/Login";
 
 function App() {
     return (
@@ -32,13 +33,14 @@ function App() {
             </Navbar>
             <Router>
                 <Switch>
-                    <Route path="/" exact={true}>
+                    <Route path="/">
                         <Main/>
                     </Route>
                     <Route path="/editor">
                         <Editor/>
                     </Route>
                     <Route path="/login">
+                        <Login/>
                     </Route>
                     <Route path="/register">
                     </Route>
