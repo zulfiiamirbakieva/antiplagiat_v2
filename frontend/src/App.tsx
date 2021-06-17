@@ -1,48 +1,59 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import './App.css';
 import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link
 } from "react-router-dom";
-import Main from "./kit/scenes/Main";
 import {Nav, Navbar, NavDropdown} from "react-bootstrap";
 import Editor from "./kit/scenes/Editor";
 import Login from "./kit/scenes/Login";
+import EditorSplit from "./kit/scenes/EditorSplit";
+import Main from "./kit/scenes/Main";
+import {useAuth} from "./hooks/use-auth";
 
 function App() {
+
+    const auth = useAuth()
+
+    useEffect(() => {
+        console.log(window.location.pathname)
+        if((!auth.isAuthenticated && !auth.isLoading && window.location.pathname !== '/login') && window.location.pathname !== '/') {
+            window.location.href = '/login'
+        }
+    }, [auth.isLoading, auth.isAuthenticated])
+
     return (
         <>
-            <Navbar bg="dark" expand="lg" variant="dark">
-                <Navbar.Brand href="#home">Antiplagiat</Navbar.Brand>
+            <Navbar expand="lg" variant="dark">
+                <Navbar.Brand href="/">Antiplagiat</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav">
-                    <Nav className="mr-auto">
-                        <Nav.Link href="#home">Home</Nav.Link>
-                        <Nav.Link href="#link">Link</Nav.Link>
-                        <NavDropdown title="Dropdown" id="basic-nav-dropdown">
-                            <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.2">Another action</NavDropdown.Item>
-                            <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                            <NavDropdown.Divider />
-                            <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
-                        </NavDropdown>
-                    </Nav>
+                <Navbar.Collapse className="justify-content-end">
+                    {
+                        auth.isAuthenticated && !auth.isLoading && <Navbar.Text>
+                            {auth.user.lastName} {auth.user.firstName}
+                        </Navbar.Text>
+                    }
+                    {
+                        !auth.isAuthenticated && !auth.isLoading && <Navbar.Text>
+                            <a href="/login">Вход / Регистрация</a>
+                        </Navbar.Text>
+                    }
                 </Navbar.Collapse>
             </Navbar>
             <Router>
                 <Switch>
-                    <Route path="/">
-                        <Main/>
+                    <Route path="/" exact>
+                        <Main />
+                    </Route>
+                    <Route path="/editor/split">
+                        <EditorSplit/>
                     </Route>
                     <Route path="/editor">
                         <Editor/>
                     </Route>
                     <Route path="/login">
                         <Login/>
-                    </Route>
-                    <Route path="/register">
                     </Route>
                 </Switch>
             </Router>

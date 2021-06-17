@@ -1,16 +1,32 @@
 import React, { useState } from "react";
 import "./index.css";
-import { Button, Jumbotron } from "react-bootstrap";
+import {useAuth} from "../../../hooks/use-auth";
 
 function Login() {
+
+  const auth = useAuth()
+
   const [isAuth, setIsAuth] = useState<boolean>(true);
 
-  const sendPromises = () => {
-    //fetch()
+
+  const [name, setName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+
+
+
+  const login = async () => {
+    await auth.signIn(email, password)
   };
+
+  const register = async () => {
+      await auth.signUp(name, lastName, email, password)
+  };
+
   return (
     <div className="dws-wrapper">
-      <div className="dws-form">
+      <div className="dws-form shadow-lg">
         <label
           className={`tab ${isAuth ? "active" : ""}`}
           title="Вкладка 1"
@@ -28,12 +44,12 @@ function Login() {
 
         {isAuth && (
           <form className="tab-form">
-            <input className="input" type="email" placeholder="Введите e-mail" />
-            <input className="input" type="password" placeholder="Введите пароль" />
+            <input className="input" type="email" placeholder="Введите e-mail" onChange={(e) => setEmail(e.target.value)} />
+            <input className="input" type="password" placeholder="Введите пароль" onChange={(e) => setPassword(e.target.value)} />
             <button
               className="btn auth"
               type="button"
-              onClick={sendPromises}
+              onClick={login}
             >
               Войти
             </button>
@@ -42,15 +58,14 @@ function Login() {
 
         {!isAuth && (
           <form className="tab-form del">
-            <input className="input" type="text" placeholder="Введите имя" />
-            <input className="input" type="text" placeholder="Введите фамилию" />
-            <input className="input" type="password" placeholder="Введите пароль" />
-            <input className="input" type="email" placeholder="Введите e-mail" />
-            <input className="input" type="password" placeholder="Введите пароль" />
+            <input className="input" type="text" placeholder="Введите имя" onChange={(e) => setName(e.target.value)} />
+            <input className="input" type="text" placeholder="Введите фамилию" onChange={(e) => setLastName(e.target.value)} />
+            <input className="input" type="email" placeholder="Введите e-mail" onChange={(e) => setEmail(e.target.value)} />
+            <input className="input" type="password" placeholder="Введите пароль" onChange={(e) => setPassword(e.target.value)} />
             <button
               className="btn register"
               type="button"
-              onClick={sendPromises}
+              onClick={register}
             >
               Регистрация
             </button>

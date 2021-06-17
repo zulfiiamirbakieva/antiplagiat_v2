@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./index.css";
 import AceEditor from "react-ace";
-import ReactDiffViewer from "react-diff-viewer";
+import ReactDiffViewer, {DiffMethod} from "react-diff-viewer";
 import { checkApi } from "../../../service/checkAPI";
 import {
   Button,
@@ -41,7 +41,7 @@ function Editor() {
     };
 
     const check = async () => {
-        setLoading(true);
+        // setLoading(true);
         try {
             const response = await checkApi.check(lang, content);
             setResults(response.data);
@@ -61,10 +61,10 @@ function Editor() {
                 </div>
             )}
             {!loading && (
-                <Container fluid>
+                <Container style={{background: '#fff'}}>
                     {!showResults && (
                         <Row>
-                            <Col md={2}>
+                            <Col md={2} className={'py-4'} style={{background: '#fff'}}>
                                 <Form.Group controlId="exampleForm.ControlSelect1">
                                     <Form.Label>Язык программирования</Form.Label>
                                     <Form.Control as="select" onChange={onSelectLang}>
@@ -76,11 +76,24 @@ function Editor() {
                                         <option value={"python"}>Python</option>
                                     </Form.Control>
                                 </Form.Group>
+                                <hr/>
+                                <Form.Group controlId="studentName">
+                                    <Form.Label>Имя студента</Form.Label>
+                                    <Form.Control type="text" placeholder="Имя" />
+                                </Form.Group>
+                                <Form.Group controlId="studentLastName">
+                                    <Form.Label>Фамилия студента</Form.Label>
+                                    <Form.Control type="text" placeholder="Фамилия" />
+                                </Form.Group>
+                                <Form.Group controlId="studentGroup">
+                                    <Form.Label>Группа студента</Form.Label>
+                                    <Form.Control type="text" placeholder="Группа" />
+                                </Form.Group>
                                 <Button variant="primary" onClick={check}>
                                     Проверить
                                 </Button>
                             </Col>
-                            <Col md={10}>
+                            <Col md={10} className={'p-0'}>
                                 <AceEditor
                                     mode={lang}
                                     theme="monokai"
@@ -115,7 +128,7 @@ function Editor() {
                                     })
                                     .map((result: any) => {
                                         return (
-                                            <>
+                                            <div style={{background: '#fff'}}>
                                                 <p>
                                                     <Card.Header>
                                                         Адрес страницы:{" "}
@@ -123,6 +136,8 @@ function Editor() {
                                                     </Card.Header>
                                                     {result.lv_values.map((lv: any) => {
                                                         if (lv.value >= 70) {
+                                                            console.log(content.replace('\n', ''))
+                                                            console.log(lv.content.replace('\n', ''))
                                                             return (
                                                                 <>
                                                                     <Card.Body>
@@ -136,39 +151,19 @@ function Editor() {
                                                                                 <strong>{lv.shinglingValue}%</strong>
                                                                             </p>
                                                                         </Card.Title>
-                                                                        <ReactDiffViewer
-                                                                            oldValue={content}
-                                                                            newValue={lv.content}
-                                                                            splitView={true}
-                                                                        />
                                                                     </Card.Body>
                                                                 </>
                                                             );
                                                         }
                                                     })}
                                                 </p>
-                                            </>
+                                            </div>
                                         );
                                     })}
                             </Card>
 
                             <br />
                             <hr />
-                            <h2 className="results_title">Общий отчет по проверке</h2>
-                            <Table striped bordered hover>
-                                <thead>
-                                <tr>
-                                    <th>Метод</th>
-                                    <th>Процентное соотношение</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>Левтенштейна</td>
-                                    <td>Mark</td>
-                                </tr>
-                                </tbody>
-                            </Table>
                         </>
                     )}
                 </Container>

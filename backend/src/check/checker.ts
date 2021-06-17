@@ -65,12 +65,16 @@ export class Checker {
   shingling(initial, searched) {
     initial = this.hash(initial);
     searched = this.hash(searched);
+
     return this.compareShingles(initial, searched);
   }
 
   private hash(text) {
     text = text.toLowerCase();
     text = this._normalize(text);
+
+    console.log(text)
+
     const shingles = this.shingle(text.split(' '), 3);
     return shingles.map((arr) => {
       return arr.map((str) => {
@@ -78,6 +82,7 @@ export class Checker {
       });
     });
   }
+
   private shingle(collection, size) {
     const shingles = [];
     for (let i = 0; i < collection.length - size + 1; i++) {
@@ -107,12 +112,16 @@ export class Checker {
       }
     });
     unionArr = unionArr.filter((i) => i);
+
+
     let intersectArr = arr1.map((val, key) => {
       if (arr2[key]) {
         return this.intersect(val, arr2[key]);
       }
     });
     intersectArr = intersectArr.filter((i) => i);
+
+
     return parseFloat(
       ((intersectArr.flat().length / unionArr.flat().length) * 100).toString(),
     ).toFixed(2);
@@ -196,8 +205,10 @@ export class Checker {
 
   private _normalize(str: string): string {
     str = str.toLowerCase();
-    str = str.replace(
-      /([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&\;\:\@])/g,
+      str = str.replace('&gt;', '');
+      str = str.replace('&amp;', '');
+      str = str.replace(
+      /([\/\,\!\\\^\$\{\}\[\]\(\)\.\"\'\*\+\?\|\<\>\-\&\;\:\@])/g,
       ' ',
     );
     str = str.replace(/\s{2,}/g, ' ');

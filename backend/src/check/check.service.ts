@@ -50,7 +50,7 @@ export class CheckService {
     const response = await this.googleService.search(
       encodeURIComponent(content),
     );
-    if (response && response.data && response.data.items.length) {
+      if (response && response.data && response.data.items && response.data.items.length) {
       const pages = response.data.items.map((item) => {
         return item.link;
       });

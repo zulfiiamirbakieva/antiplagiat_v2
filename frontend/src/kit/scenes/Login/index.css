@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700');
 
 body {
-    background: url("https://kmpo.ranepa.ru/upload/iblock/7ba/222.jpg") no-repeat;
+    background: url("https://wpapers.ru/wallpapers/3d/Abstractions/13010/1920x1080_%D0%9D%D0%B5-%D1%82%D0%B0%D0%BA%D0%BE%D0%B9-%D0%BA%D0%B0%D0%BA-%D0%B2%D1%81%D0%B5.jpg") no-repeat;
     -moz-background-size: 100%; /* Firefox 3.6+ */
     -webkit-background-size: 100%; /* Safari 3.1+ и Chrome 4.0+ */
     -o-background-size: 100%; /* Opera 9.6+ */
@@ -17,7 +17,7 @@ body {
 
 .dws-wrapper {
     display: flex;
-    height: 100vh;
+    height: calc(100vh - 56px);
     justify-content: center;
     align-items: center;
 }
@@ -45,7 +45,7 @@ body {
 }
 
 label.tab{
-    color: cornflowerblue;
+    color: white;
     font-weight: 600;
     padding: 15px;
     display: inline-block;
@@ -55,10 +55,10 @@ label.tab{
 }
 label.tab.active {
     background: #fff;
-    color: cornflowerblue;
+    color: black;
 }
 .btn {
-    background: #298cad;
+    background: #37383a;
     color: #ffffff;
     font-size: 18px;
     text-transform: uppercase;
@@ -68,9 +68,8 @@ label.tab.active {
     margin-top: 30px;
     margin-bottom: 10px;
     width: 100%;
-    transition: 1s all;
+    transition: .3s all;
 }
 .btn:hover {
-    color: darkblue;
-    font-size: 20px;
+    color: #1567d5;
 }

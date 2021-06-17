@@ -1,20 +1,34 @@
 import React from 'react';
-import {Button, Jumbotron} from "react-bootstrap";
+import './index.css'
 
 function Main() {
     return (
-        <>
-            <Jumbotron>
-                <h1>Hello, world!</h1>
-                <p>
-                    This is a simple hero unit, a simple jumbotron-style component for calling
-                    extra attention to featured content or information.
-                </p>
-                <p>
-                    <Button variant="primary">Learn more</Button>
-                </p>
-            </Jumbotron>
-        </>
+        <div className="main_content">
+            <div className="main_wrapper">
+                <div><h1>Добро пожаловать в систему проверки алгоритма на уникальность "Antiplagiat!"</h1></div>
+                <div><h2>Выберите одну из опций нашей программы:</h2></div>
+                <div className="button_wrapper">
+                    <div className="button_wrapper__left">
+                        <a
+                            href={'/editor'}
+                            className="btn register"
+                            type="button"
+                        >
+                            Проверка кода
+                        </a>
+                    </div>
+                    <div className="button_wrapper__right">
+                        <a
+                            href={'editor/split'}
+                            className="btn register"
+                            type="button"
+                        >
+                            Сравнение кода
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 

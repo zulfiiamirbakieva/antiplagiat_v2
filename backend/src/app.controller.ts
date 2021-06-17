@@ -9,7 +9,12 @@ export class AppController {
     @UseGuards(LocalAuthGuard)
     @Post('auth/login')
     async login(@Request() req) {
-        return this.authService.login(req.user);
+        return this.authService.login(req.body);
+    }
+
+    @Post('auth/register')
+    async register(@Request() req) {
+        return this.authService.register(req.body);
     }
 
     @UseGuards(JwtAuthGuard)
