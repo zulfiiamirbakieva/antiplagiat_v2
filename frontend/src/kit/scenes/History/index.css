@@ -1,0 +1,20 @@
+.loader {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #000;
+    opacity: 0.7;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s all;
+}
+
+.results_title {
+    text-align: center;
+}
+
+.codeMarker { background: #2ea043; color: #000 !important; position: absolute; z-index: 20; }

@@ -1,15 +1,19 @@
-import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Prop, SchemaFactory, Schema, raw } from '@nestjs/mongoose';
+import * as mongoose from 'mongoose';
+import * as MongoDB from "mongodb"
 
-export type HistoryDocument = History & Document;
+export type HistoryDocument = History & mongoose.Document;
 
 @Schema()
 export class History {
-    @Prop()
-    userId: string;
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Users' })
+    userId: MongoDB.ObjectId;
 
     @Prop()
     checkResults: string;
+
+    @Prop()
+    lang: string;
 
     @Prop(raw({
         firstName: { type: String },

@@ -1,14 +1,44 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  UseGuards,
+  Request,
+} from '@nestjs/common';
 import { CheckService } from './check.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('check')
 export class CheckController {
   constructor(private readonly checkService: CheckService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async event(@Body() payload: { lang: string; content: string }, @Res() res) {
+  async event(
+    @Request() req,
+    @Body()
+    payload: {
+      options: {
+        lang: string;
+        student_name: string;
+        student_surname: string;
+        student_group: string;
+      };
+      content: string;
+      second_content: string;
+    },
+    @Res() res,
+  ) {
     return res
       .status(200)
-      .send(await this.checkService.check(payload.lang, payload.content));
+      .send(
+        await this.checkService.check(
+          payload.options,
+          req.user.userId,
+          payload.content,
+          payload.second_content,
+        ),
+      );
   }
 }
